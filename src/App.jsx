@@ -1,13 +1,55 @@
 import React, { useMemo, useState } from "react";
 
 const candidates = [
-  { id: 1, city: "Sultan Kudarat", name: "Jenrose Javier" },
-  { id: 2, city: "La Union", name: "Bea Millan-Windorski" },
-  { id: 3, city: "Cebu City", name: "Apriel Smith" },
-  { id: 4, city: "Tarlac", name: "Marian Arellano" },
-  { id: 5, city: "Taguig City", name: "Ysabella Ysmael" },
-  { id: 6, city: "Cebu Province", name: "Nicole Borromeo" },
-  { id: 7, city: "Pampanga", name: "Allyson Hetland" }
+  {
+    id: 1,
+    city: "Sultan Kudarat",
+    name: "Jenrose Javier",
+    image:
+      "https://scontent.fdvo1-2.fna.fbcdn.net/v/t39.30808-6/684214709_122180888174757835_6781950486152314212_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_ohc=zXAoFMsxSxoQ7kNvwFV_Ayj&_nc_oc=AdpWTgG6mL-cxQN8Zi6Kr2eeCc9k1JyyRpM_OVpVe3-DbhdTTIpcYzJ44u_qwXhAyK0&_nc_zt=23&_nc_ht=scontent.fdvo1-2.fna&_nc_gid=Kd5UjZZjm6USxPxgseTmRg&_nc_ss=7b2a8&oh=00_Af5k260eJBUpspMXIhXeode2yhKjodDS4yKEqvc7veN2Jw&oe=69FBF848"
+  },
+  {
+    id: 2,
+    city: "La Union",
+    name: "Bea Millan-Windorski",
+    image:
+      "https://scontent.fdvo1-2.fna.fbcdn.net/v/t39.30808-6/684167910_122180887364757835_2196171469952368801_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7b2446&_nc_ohc=WCTDMSj2UdUQ7kNvwE0ri_N&_nc_oc=Adqumx9wi5t-7GkqLvLseCdL4FmWuq7tysb1g55i54kwFYAIOUNJEIQ2saEXAbgEm_E&_nc_zt=23&_nc_ht=scontent.fdvo1-2.fna&_nc_gid=xGSxPr2FZeJfKbv76Cqssg&_nc_ss=7b2a8&oh=00_Af4UsnSxpEzCf2DvX-GzJde8dYmnJQbHaR3ldE03-FtQCw&oe=69FBF092"
+  },
+  {
+    id: 3,
+    city: "Cebu City",
+    name: "Apriel Smith",
+    image:
+      "https://scontent.fdvo1-2.fna.fbcdn.net/v/t39.30808-6/684737957_122180887874757835_1042546779515364061_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_ohc=Bb1Y4Z3T42kQ7kNvwHmFujG&_nc_oc=AdqSfxo4woSVCAuPyg2BDDC0QbQH67C9SEu08v5Zyi5qwMqqbRWHWRn89_WipfEPf2M&_nc_zt=23&_nc_ht=scontent.fdvo1-2.fna&_nc_gid=B_AA7hQS3Xq6TRGHiDXA_w&_nc_ss=7b2a8&oh=00_Af5LCSucpP5Z7ZWtYaRBR8VTpof0TXe839JDJcTc8AVicQ&oe=69FBC732"
+  },
+  {
+    id: 4,
+    city: "Tarlac",
+    name: "Marian Arellano",
+    image:
+      "https://scontent.fdvo1-1.fna.fbcdn.net/v/t39.30808-6/685142633_122180888162757835_2750101556161659682_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=7b2446&_nc_ohc=nTVsMSHoKvUQ7kNvwEF0ua9&_nc_oc=Adq3yu85QNJJO7qaCvcVboGTIIdSvxic4CrkQlcZ_zMkiWjvyouosl_KxjzI-DSI9qU&_nc_zt=23&_nc_ht=scontent.fdvo1-1.fna&_nc_gid=tR0E1ZLvabxmBzFTb9WFTQ&_nc_ss=7b2a8&oh=00_Af6kro28BcfcvY5ONe7iS1Zh75yG9Xmi3wZR__Fi8MEc6A&oe=69FBF7FC"
+  },
+  {
+    id: 5,
+    city: "Taguig City",
+    name: "Ysabella Ysmael",
+    image:
+      "https://scontent.fdvo1-2.fna.fbcdn.net/v/t39.30808-6/682843490_122180887706757835_7517361211844359379_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=7b2446&_nc_ohc=4gfvnH9hbbkQ7kNvwElbK2f&_nc_oc=AdrMhCv-Ns1ViprI4QLcMBqiZQwqdt6jPyUePpfw_CvE767G4i_uwzECIGLjTjZYT7Q&_nc_zt=23&_nc_ht=scontent.fdvo1-2.fna&_nc_gid=Z5CfihdWfLYbkzQ0eFIsyg&_nc_ss=7b2a8&oh=00_Af7PoW23DTvbyiXiIy89tVGd5IwgKz3xmjMfa2iY-tzyjw&oe=69FBE6E3"
+  },
+  {
+    id: 6,
+    city: "Cebu Province",
+    name: "Nicole Borromeo",
+    image:
+      "https://scontent.fdvo1-2.fna.fbcdn.net/v/t39.30808-6/684669010_122180886920757835_8842950161026789360_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7b2446&_nc_ohc=3u1ubCAj3isQ7kNvwFZLHv_&_nc_oc=AdrbL0_fmxOP62Sbfjc5yQwLNRDUF6hfwReEeFJURXegBucrrBLov2OAKN4dIMyecDk&_nc_zt=23&_nc_ht=scontent.fdvo1-2.fna&_nc_gid=QyfX4O4913Rq93Qr5y7vFQ&_nc_ss=7b2a8&oh=00_Af6EGywrqCYfudt_ZO_dS9VigKiJVCcOXVZfBVoPOwp8UQ&oe=69FBEDBE"
+  },
+  {
+    id: 7,
+    city: "Pampanga",
+    name: "Allyson Hetland",
+    image:
+      "https://scontent.fdvo1-2.fna.fbcdn.net/v/t39.30808-6/685750334_122180887760757835_1778019681656030687_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7b2446&_nc_ohc=DyGf3B2ONEMQ7kNvwEuio-z&_nc_oc=AdochlKNCGWNLO2SpufxbvpuGG5hiUd8FLgDu5JchqJI2CaT--zuZk-X9xvk0ggkvvw&_nc_zt=23&_nc_ht=scontent.fdvo1-2.fna&_nc_gid=JcWd-N7Trm94FyNHggP-vQ&_nc_ss=7b2a8&oh=00_Af49k2FjhZLmWBBPhx5VexJcoglqLphyw3KrIhw4x9TIPQ&oe=69FBF0F8"
+  }
 ];
 
 const TITLE_ORDER = [
@@ -65,6 +107,12 @@ function displayName(candidate) {
 function runTests() {
   console.assert(candidates.length === 7, "Expected 7 official finalists.");
   console.assert(TITLE_ORDER.length === 7, "Expected 7 titles.");
+  console.assert(
+    candidates.every(function (candidate) {
+      return typeof candidate.image === "string" && candidate.image.length > 0;
+    }),
+    "Each candidate should have an image."
+  );
   console.assert(clampScore(120) === 100, "Scores above 100 should clamp to 100.");
   console.assert(clampScore(-5) === 0, "Scores below 0 should clamp to 0.");
   console.assert(clampScore(88) === 88, "Valid score should remain unchanged.");
@@ -78,9 +126,27 @@ runTests();
 function CandidatePhoto(props) {
   var candidate = props.candidate;
   var className = props.className || "";
+  var sizeClass = props.sizeClass || "";
+  var [imageFailed, setImageFailed] = useState(false);
+
+  if (!imageFailed && candidate.image) {
+    return (
+      <div className={"bg-neutral-100 " + className}>
+        <img
+          src={candidate.image}
+          alt={candidate.name}
+          className={"h-full w-full object-cover " + sizeClass}
+          loading="lazy"
+          onError={function () {
+            setImageFailed(true);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className={`grid place-items-center bg-neutral-100 text-neutral-950 ${className}`}>
+    <div className={"grid place-items-center bg-neutral-100 text-neutral-950 " + className}>
       <div className="grid h-14 w-14 place-items-center rounded-full border border-neutral-200 bg-white text-lg font-semibold shadow-sm">
         {getInitials(candidate.name, candidate.city)}
       </div>
@@ -91,8 +157,12 @@ function CandidatePhoto(props) {
 function StatCard(props) {
   return (
     <div className="rounded-[24px] border border-neutral-200/70 bg-white px-5 py-4 shadow-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{props.label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-[-0.055em] text-neutral-950">{props.value}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+        {props.label}
+      </p>
+      <p className="mt-2 text-3xl font-semibold tracking-[-0.055em] text-neutral-950">
+        {props.value}
+      </p>
     </div>
   );
 }
@@ -138,7 +208,10 @@ export default function PageantScoringSystem() {
     if (!clean) return candidates;
 
     return candidates.filter(function (candidate) {
-      return candidate.name.toLowerCase().includes(clean) || candidate.city.toLowerCase().includes(clean);
+      return (
+        candidate.name.toLowerCase().includes(clean) ||
+        candidate.city.toLowerCase().includes(clean)
+      );
     });
   }, [query]);
 
@@ -156,7 +229,9 @@ export default function PageantScoringSystem() {
     setScores({});
     setFinalSubmitted(false);
     setIsVerifying(false);
-    setVerificationMessage("Official Top 7 is ready. Enter Q&A scores, then submit to reveal the final titleholders.");
+    setVerificationMessage(
+      "Official Top 7 is ready. Enter Q&A scores, then submit to reveal the final titleholders."
+    );
   }
 
   function verifyWithDelay(message, callback) {
@@ -175,7 +250,11 @@ export default function PageantScoringSystem() {
 
     if (incomplete.length > 0) {
       setVerificationMessage(
-        "Final verification failed: " + incomplete.length + " Top 7 candidate" + (incomplete.length === 1 ? "" : "s") + " still need Q&A scores."
+        "Final verification failed: " +
+          incomplete.length +
+          " Top 7 candidate" +
+          (incomplete.length === 1 ? "" : "s") +
+          " still need Q&A scores."
       );
       return;
     }
@@ -190,7 +269,8 @@ export default function PageantScoringSystem() {
     return hasScore(scores[candidate.id], "qa");
   }).length;
 
-  const highestFinal = finalSubmitted && titleholders[0] ? titleholders[0].finalTotal.toFixed(2) : "—";
+  const highestFinal =
+    finalSubmitted && titleholders[0] ? titleholders[0].finalTotal.toFixed(2) : "—";
 
   return (
     <div className="min-h-screen bg-[#f7f7f8] text-neutral-950 [font-family:-apple-system,BlinkMacSystemFont,'SF_Pro_Display','SF_Pro_Text','Helvetica_Neue',Arial,sans-serif]">
@@ -207,13 +287,27 @@ export default function PageantScoringSystem() {
 
         <nav className="flex flex-col gap-4 rounded-[28px] border border-neutral-200/70 bg-white/80 px-5 py-4 shadow-[0_20px_70px_rgba(0,0,0,0.045)] backdrop-blur-2xl md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">One Judge Panel</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.045em]">Miss Universe Philippines 2026 Q&A Scoring System</h1>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+              One Judge Panel
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.045em]">
+              Miss Universe Philippines 2026 Q&A Scoring System
+            </h1>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <a href="#results" className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950">Results</a>
-            <a href="#scorecards" className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800">Scorecards</a>
+            <a
+              href="#results"
+              className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950"
+            >
+              Results
+            </a>
+            <a
+              href="#scorecards"
+              className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            >
+              Scorecards
+            </a>
             <button
               onClick={handleSubmitFinal}
               disabled={isVerifying}
@@ -221,7 +315,12 @@ export default function PageantScoringSystem() {
             >
               {isVerifying ? "Verifying..." : finalSubmitted ? "Titles Revealed" : "Submit Q&A Scores"}
             </button>
-            <button onClick={clearScores} className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100">Clear</button>
+            <button
+              onClick={clearScores}
+              className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+            >
+              Clear
+            </button>
           </div>
         </nav>
 
@@ -234,7 +333,8 @@ export default function PageantScoringSystem() {
               Miss Universe Philippines 2026 Q&A Scoring System
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-500">
-              Enter Q&A scores for the official Top 7. The final titleholders are ranked automatically based on Q&A score.
+              Enter Q&A scores for the official Top 7. The final titleholders are ranked automatically
+              based on Q&A score.
             </p>
           </div>
 
@@ -247,20 +347,31 @@ export default function PageantScoringSystem() {
               disabled={isVerifying}
               className="rounded-[24px] bg-neutral-950 px-5 py-4 text-left text-sm font-semibold text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <span className="block text-[11px] uppercase tracking-[0.18em] text-white/45">Final Action</span>
-              <span className="mt-2 block text-2xl tracking-[-0.04em]">{isVerifying ? "Verifying..." : finalSubmitted ? "Titles Revealed" : "Submit Q&A"}</span>
+              <span className="block text-[11px] uppercase tracking-[0.18em] text-white/45">
+                Final Action
+              </span>
+              <span className="mt-2 block text-2xl tracking-[-0.04em]">
+                {isVerifying ? "Verifying..." : finalSubmitted ? "Titles Revealed" : "Submit Q&A"}
+              </span>
             </button>
           </div>
         </section>
       </header>
 
       <main className="relative mx-auto max-w-[1440px] px-5 pb-20 sm:px-8 lg:px-10">
-        <section id="results" className="mb-8 overflow-hidden rounded-[34px] border border-neutral-200/70 bg-white shadow-[0_24px_90px_rgba(0,0,0,0.06)]">
+        <section
+          id="results"
+          className="mb-8 overflow-hidden rounded-[34px] border border-neutral-200/70 bg-white shadow-[0_24px_90px_rgba(0,0,0,0.06)]"
+        >
           <div className="border-b border-neutral-100 px-5 py-5 md:px-7">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">Final Ranking</p>
-                <h2 className="mt-2 text-4xl font-semibold tracking-[-0.06em] md:text-6xl">Automatic Results</h2>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                  Final Ranking
+                </p>
+                <h2 className="mt-2 text-4xl font-semibold tracking-[-0.06em] md:text-6xl">
+                  Automatic Results
+                </h2>
               </div>
               <p className="max-w-md text-sm leading-6 text-neutral-500">
                 Results stay hidden until all Q&A scores are submitted and verified.
@@ -269,13 +380,28 @@ export default function PageantScoringSystem() {
           </div>
 
           <div className="px-5 py-6 md:px-7">
-            <div className={`mb-6 rounded-[26px] border px-5 py-4 ${finalSubmitted ? "border-green-100 bg-green-50 text-green-700" : verificationMessage.includes("failed") ? "border-red-100 bg-red-50 text-red-700" : "border-neutral-200 bg-neutral-50 text-neutral-600"}`}>
+            <div
+              className={
+                "mb-6 rounded-[26px] border px-5 py-4 " +
+                (finalSubmitted
+                  ? "border-green-100 bg-green-50 text-green-700"
+                  : verificationMessage.includes("failed")
+                  ? "border-red-100 bg-red-50 text-red-700"
+                  : "border-neutral-200 bg-neutral-50 text-neutral-600")
+              }
+            >
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">Verification Status</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">
+                    Verification Status
+                  </p>
                   <p className="mt-1 text-sm font-semibold">{verificationMessage}</p>
                 </div>
-                <button onClick={handleSubmitFinal} disabled={isVerifying} className="rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60">
+                <button
+                  onClick={handleSubmitFinal}
+                  disabled={isVerifying}
+                  className="rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
                   {finalSubmitted ? "Titles Revealed" : "Submit Q&A Scores"}
                 </button>
               </div>
@@ -284,8 +410,12 @@ export default function PageantScoringSystem() {
             <div>
               <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">Finalists</p>
-                  <h3 className="mt-1 text-3xl font-semibold tracking-[-0.05em] md:text-4xl">Top 7 Titleholders</h3>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                    Finalists
+                  </p>
+                  <h3 className="mt-1 text-3xl font-semibold tracking-[-0.05em] md:text-4xl">
+                    Top 7 Titleholders
+                  </h3>
                 </div>
                 <p className="text-sm text-neutral-500">Determined by Q&A scores only</p>
               </div>
@@ -293,66 +423,105 @@ export default function PageantScoringSystem() {
               <div className="grid gap-4 lg:grid-cols-4">
                 {!finalSubmitted && (
                   <div className="rounded-[30px] border border-dashed border-neutral-200 bg-neutral-50 p-8 text-center lg:col-span-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">Awaiting Q&A Verification</p>
-                    <h4 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-neutral-950">Titleholders are hidden</h4>
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-neutral-500">Enter Q&A scores for all seven finalists, then submit to reveal the final titleholders.</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                      Awaiting Q&A Verification
+                    </p>
+                    <h4 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-neutral-950">
+                      Titleholders are hidden
+                    </h4>
+                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-neutral-500">
+                      Enter Q&A scores for all seven finalists, then submit to reveal the final titleholders.
+                    </p>
                   </div>
                 )}
 
                 {finalSubmitted && titleholders[0] && (
                   <div className="overflow-hidden rounded-[30px] border border-neutral-200 bg-neutral-950 text-white shadow-[0_24px_70px_rgba(0,0,0,0.16)] lg:col-span-2 lg:row-span-2">
                     <div className="grid gap-0 md:grid-cols-[0.85fr_1fr] lg:h-full">
-                      <div className="aspect-[4/5] overflow-hidden bg-neutral-900 md:aspect-auto"><CandidatePhoto candidate={titleholders[0]} className="h-full w-full" /></div>
+                      <div className="aspect-[4/5] overflow-hidden bg-neutral-900 md:aspect-auto">
+                        <CandidatePhoto candidate={titleholders[0]} className="h-full w-full" />
+                      </div>
                       <div className="flex flex-col justify-between p-6 md:p-8">
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">Overall Winner</p>
-                          <h3 className="mt-3 text-4xl font-semibold leading-[0.95] tracking-[-0.06em] md:text-5xl">{titleholders[0].title}</h3>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
+                            Overall Winner
+                          </p>
+                          <h3 className="mt-3 text-4xl font-semibold leading-[0.95] tracking-[-0.06em] md:text-5xl">
+                            {titleholders[0].title}
+                          </h3>
                           <div className="mt-6 h-px w-full bg-white/10" />
-                          <p className="mt-6 text-2xl font-semibold tracking-[-0.04em]">{displayName(titleholders[0])}</p>
+                          <p className="mt-6 text-2xl font-semibold tracking-[-0.04em]">
+                            {displayName(titleholders[0])}
+                          </p>
                           <p className="mt-1 text-base text-white/55">{titleholders[0].city}</p>
                         </div>
                         <div className="mt-8 rounded-[24px] border border-white/10 bg-white/10 p-5">
                           <p className="text-sm text-white/50">Q&A Score</p>
-                          <p className="mt-1 text-6xl font-semibold tracking-[-0.07em]">{titleholders[0].finalTotal.toFixed(2)}</p>
+                          <p className="mt-1 text-6xl font-semibold tracking-[-0.07em]">
+                            {titleholders[0].finalTotal.toFixed(2)}
+                          </p>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {finalSubmitted && titleholders.slice(1).map(function (candidate) {
-                  return (
-                    <div key={candidate.id} className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm">
-                      <div className="flex gap-4">
-                        <div className="h-24 w-20 shrink-0 overflow-hidden rounded-[20px] bg-neutral-100"><CandidatePhoto candidate={candidate} className="h-full w-full" /></div>
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-2 inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-semibold text-neutral-500">Rank #{candidate.placement}</div>
-                          <h3 className="line-clamp-2 text-base font-semibold leading-5 tracking-[-0.025em] text-neutral-950">{candidate.title}</h3>
-                          <p className="mt-2 truncate text-sm font-medium text-neutral-700">{displayName(candidate)}</p>
-                          <div className="mt-3 flex items-center justify-between gap-3">
-                            <p className="truncate text-xs text-neutral-400">{candidate.city}</p>
-                            <p className="text-lg font-semibold tracking-[-0.04em] text-neutral-950">{candidate.finalTotal.toFixed(2)}</p>
+                {finalSubmitted &&
+                  titleholders.slice(1).map(function (candidate) {
+                    return (
+                      <div
+                        key={candidate.id}
+                        className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm"
+                      >
+                        <div className="flex gap-4">
+                          <div className="h-24 w-20 shrink-0 overflow-hidden rounded-[20px] bg-neutral-100">
+                            <CandidatePhoto candidate={candidate} className="h-full w-full" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2 inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-semibold text-neutral-500">
+                              Rank #{candidate.placement}
+                            </div>
+                            <h3 className="line-clamp-2 text-base font-semibold leading-5 tracking-[-0.025em] text-neutral-950">
+                              {candidate.title}
+                            </h3>
+                            <p className="mt-2 truncate text-sm font-medium text-neutral-700">
+                              {displayName(candidate)}
+                            </p>
+                            <div className="mt-3 flex items-center justify-between gap-3">
+                              <p className="truncate text-xs text-neutral-400">{candidate.city}</p>
+                              <p className="text-lg font-semibold tracking-[-0.04em] text-neutral-950">
+                                {candidate.finalTotal.toFixed(2)}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </div>
           </div>
         </section>
 
-        <section id="scorecards" className="overflow-hidden rounded-[34px] border border-neutral-200/70 bg-white shadow-[0_24px_90px_rgba(0,0,0,0.06)]">
+        <section
+          id="scorecards"
+          className="overflow-hidden rounded-[34px] border border-neutral-200/70 bg-white shadow-[0_24px_90px_rgba(0,0,0,0.06)]"
+        >
           <div className="border-b border-neutral-100 px-5 py-5 md:px-7">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">Score Entry</p>
-                <h2 className="mt-2 text-4xl font-semibold tracking-[-0.06em] md:text-6xl">Q&A Scorecards</h2>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                  Score Entry
+                </p>
+                <h2 className="mt-2 text-4xl font-semibold tracking-[-0.06em] md:text-6xl">
+                  Q&A Scorecards
+                </h2>
               </div>
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={function (event) {
+                  setQuery(event.target.value);
+                }}
                 placeholder="Search finalist or province"
                 className="w-full rounded-full border border-neutral-200 bg-neutral-50 px-5 py-3 text-sm font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-950 focus:bg-white md:max-w-sm"
               />
@@ -370,31 +539,60 @@ export default function PageantScoringSystem() {
 
               return (
                 <article key={candidate.id} className="bg-white p-5">
-                  <div className={`overflow-hidden rounded-[28px] border bg-white shadow-sm transition hover:shadow-[0_18px_60px_rgba(0,0,0,0.07)] ${currentTitle ? "border-neutral-950" : "border-neutral-200"}`}>
+                  <div
+                    className={
+                      "overflow-hidden rounded-[28px] border bg-white shadow-sm transition hover:shadow-[0_18px_60px_rgba(0,0,0,0.07)] " +
+                      (currentTitle ? "border-neutral-950" : "border-neutral-200")
+                    }
+                  >
                     <div className="grid grid-cols-[108px_1fr]">
-                      <div className="h-full min-h-[150px] overflow-hidden bg-neutral-100"><CandidatePhoto candidate={candidate} className="h-full w-full" /></div>
+                      <div className="h-full min-h-[150px] overflow-hidden bg-neutral-100">
+                        <CandidatePhoto candidate={candidate} className="h-full w-full" />
+                      </div>
 
                       <div className="flex flex-col justify-between p-4">
                         <div>
                           <div className="flex items-start justify-between gap-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">#{candidate.id}</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+                              #{candidate.id}
+                            </p>
                             <div className="rounded-2xl bg-neutral-950 px-3 py-2 text-right text-white">
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45">Status</p>
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45">
+                                Status
+                              </p>
                               <p className="text-sm font-semibold">Top 7</p>
                             </div>
                           </div>
-                          <h3 className="mt-3 text-xl font-semibold leading-6 tracking-[-0.04em]">{displayName(candidate)}</h3>
+                          <h3 className="mt-3 text-xl font-semibold leading-6 tracking-[-0.04em]">
+                            {displayName(candidate)}
+                          </h3>
                           <p className="mt-1 text-sm font-medium text-neutral-500">{candidate.city}</p>
                         </div>
 
-                        {currentTitle && <div className="mt-2 rounded-2xl border border-neutral-200 bg-neutral-950 px-3 py-2 text-xs font-semibold leading-4 text-white">{currentTitle.title}</div>}
+                        {currentTitle && (
+                          <div className="mt-2 rounded-2xl border border-neutral-200 bg-neutral-950 px-3 py-2 text-xs font-semibold leading-4 text-white">
+                            {currentTitle.title}
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     <div className="border-t border-neutral-100 bg-neutral-50/70 p-4">
                       <label className="block">
-                        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Q&A</span>
-                        <input type="number" min="0" max="100" value={score.qa || score.qa === 0 ? score.qa : ""} onChange={(event) => updateScore(candidate.id, "qa", event.target.value)} placeholder="0" className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950" />
+                        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
+                          Q&A
+                        </span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={score.qa || score.qa === 0 ? score.qa : ""}
+                          onChange={function (event) {
+                            updateScore(candidate.id, "qa", event.target.value);
+                          }}
+                          placeholder="0"
+                          className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950"
+                        />
                       </label>
                     </div>
                   </div>
