@@ -1,37 +1,55 @@
 import React, { useMemo, useState } from "react";
 
 const candidates = [
+  { city: "Muntinlupa", name: "Adela-Mae Marshall" },
+  { city: "Rizal", name: "Alicia Buendia" },
+  { city: "Pampanga", name: "Allyson Hetland" },
+  { city: "Negros Occidental", name: "Alexandra Colmenares" },
   { city: "Albay", name: "Alexandra Krishna Oriño" },
-  { city: "Baguio City", name: "Roxie Baeyens" },
-  { city: "Camiguin", name: "Erica Cadayday" },
-  { city: "Cavite", name: "Jencel Caña" },
   { city: "Cebu City", name: "Apriel Smith" },
-  { city: "Cebu Province", name: "Nicole Borromeo" },
-  { city: "Cotabato Province", name: "Clarissa Westram" },
-  { city: "Iligan City", name: "Trexy Paris Roxas" },
-  { city: "Ilocos Norte", name: "Cherieze Cacayorin" },
-  { city: "Iloilo City", name: "Zestah Espinosa" },
-  { city: "La Union", name: "Bea Millan-Windorski" },
-  { city: "Laguna", name: "Ysabel Prats" },
   { city: "Luisiana, Laguna", name: "Ashley Subijano Montenegro" },
+  { city: "La Union", name: "Bea Millan-Windorski" },
+  { city: "Samar Island", name: "Catherine Wardle" },
+  { city: "Ilocos Norte", name: "Cherieze Cacayorin" },
+  { city: "Tandag City", name: "Chrystel Mae Correos" },
+  { city: "Cotabato Province", name: "Clarissa Westram" },
+  { city: "Pangasinan", name: "Donna Rein Nuguid" },
+  { city: "Camiguin", name: "Erica Cadayday" },
+  { city: "Tacloban City", name: "Jacqueline Gulrajani" },
+  { city: "San Jose, Negros Oriental", name: "Jayka Munsayac" },
+  { city: "Cavite", name: "Jencel Caña" },
+  { city: "Sultan Kudarat", name: "Jenrose Javier" },
   { city: "Manila", name: "Justine Felizarta" },
   { city: "Mountain Province", name: "Lyneree Montero-Yodong" },
-  { city: "Muntinlupa", name: "Adela-Mae Marshall" },
-  { city: "Negros Occidental", name: "Alexandra Colmenares" },
-  { city: "Pampanga", name: "Allyson Hetland" },
-  { city: "Pangasinan", name: "Donna Rein Nuguid" },
-  { city: "Quezon Province", name: "Patricia Ella Evangelista" },
-  { city: "Rizal", name: "Alicia Buendia" },
-  { city: "Samar Island", name: "Catherine Wardle" },
-  { city: "San Jose, Negros Oriental", name: "Jayka Munsayac" },
-  { city: "Sarangani", name: "Nicole Cruz" },
-  { city: "Sto. Tomas, La Union", name: "Rachel-Hanna Gozum" },
-  { city: "Sultan Kudarat", name: "Jenrose Javier" },
-  { city: "Tacloban City", name: "Jacqueline Gulrajani" },
-  { city: "Taguig City", name: "Ysabella Ysmael" },
-  { city: "Tandag City", name: "Chrystel Mae Correos" },
   { city: "Tarlac", name: "Marian Arellano" },
+  { city: "Sarangani", name: "Nicole Cruz" },
+  { city: "Cebu Province", name: "Nicole Borromeo" },
+  { city: "Quezon Province", name: "Patricia Ella Evangelista" },
+  { city: "Sto. Tomas, La Union", name: "Rachel-Hanna Gozum" },
+  { city: "Baguio City", name: "Roxie Baeyens" },
+  { city: "Iligan City", name: "Trexy Paris Roxas" },
+  { city: "Taguig City", name: "Ysabella Ysmael" },
+  { city: "Laguna", name: "Ysabel Prats" },
+  { city: "Iloilo City", name: "Zestah Espinosa" },
 ].map((candidate, index) => ({ ...candidate, id: index + 1 }));
+
+const officialTop15Cities = [
+  "Muntinlupa",
+  "Sultan Kudarat",
+  "Baguio City",
+  "Tacloban City",
+  "La Union",
+  "Quezon Province",
+  "Taguig City",
+  "Camiguin",
+  "Tarlac",
+  "Manila",
+  "Iloilo City",
+  "Cebu Province",
+  "Cebu City",
+  "Pampanga",
+  "Negros Occidental",
+];
 
 const titleOrder = [
   "Miss Universe Philippines 2026",
@@ -72,6 +90,7 @@ function getInitials(name, city) {
 function runTests() {
   console.assert(candidates.length === 30, "Expected 30 candidates.");
   console.assert(titleOrder.length === 7, "Expected 7 titles.");
+  console.assert(officialTop15Cities.length === 15, "Expected 15 official semifinalists.");
   console.assert(clampScore(120) === 100, "Scores above 100 should clamp to 100.");
   console.assert(clampScore(-5) === 0, "Scores below 0 should clamp to 0.");
   console.assert(getScore({ swimsuit: 91 }, "swimsuit") === 91, "Swimsuit score should be read correctly.");
@@ -134,7 +153,17 @@ export default function PageantScoringSystem() {
   }, [scores]);
 
   const top15 = top15Submitted
-    ? swimsuitRanking.slice(0, 15).map((candidate, index) => ({ ...candidate, placement: index + 1 }))
+    ? officialTop15Cities.map((city, index) => {
+        const candidate = candidates.find((item) => item.city === city);
+        const rankedCandidate = swimsuitRanking.find((item) => item.city === city);
+        return {
+          ...candidate,
+          score: scores[candidate.id] || {},
+          swimsuitTotal: rankedCandidate?.swimsuitTotal || 0,
+          swimsuitComplete: rankedCandidate?.swimsuitComplete || 0,
+          placement: index + 1,
+        };
+      })
     : [];
 
   const top15Ids = useMemo(() => new Set(top15.map((candidate) => candidate.id)), [top15]);
@@ -253,11 +282,11 @@ export default function PageantScoringSystem() {
       return;
     }
 
-    verifyWithDelay("Verifying swimsuit scores for all Top 30 candidates...", () => {
+    verifyWithDelay("Verifying swimsuit scores and loading the official Top 15...", () => {
       setTop15Submitted(true);
       setTop7Submitted(false);
       setFinalSubmitted(false);
-      setVerificationMessage("Top 15 revealed. Now score evening gown for the Top 15 only.");
+      setVerificationMessage("Official Top 15 revealed. Now score evening gown for the Top 15 only.");
     });
   };
 
@@ -405,7 +434,7 @@ export default function PageantScoringSystem() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">Stage 1</p>
                   <h3 className="mt-1 text-3xl font-semibold tracking-[-0.05em] md:text-4xl">Top 15 Semifinalists</h3>
                 </div>
-                <p className="text-sm text-neutral-500">Determined by Top 30 swimsuit scores</p>
+                <p className="text-sm text-neutral-500">Official Top 15 list for evening gown scoring</p>
               </div>
 
               <div className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white">
@@ -413,7 +442,7 @@ export default function PageantScoringSystem() {
                   <div className="bg-neutral-50 px-4 py-3">Rank</div>
                   <div className="bg-neutral-50 px-4 py-3">Candidate</div>
                   <div className="bg-neutral-50 px-4 py-3">City / Province</div>
-                  <div className="bg-neutral-50 px-4 py-3 text-right">Swimsuit</div>
+                  <div className="bg-neutral-50 px-4 py-3 text-right">Status</div>
                 </div>
 
                 <div className="divide-y divide-neutral-100">
@@ -426,7 +455,7 @@ export default function PageantScoringSystem() {
                             <div className="min-w-0"><p className="truncate text-sm font-semibold text-neutral-950">{displayName(candidate)}</p><p className="text-xs text-neutral-400 md:hidden">{candidate.city}</p></div>
                           </div>
                           <div className="hidden text-sm text-neutral-500 md:block">{candidate.city}</div>
-                          <div className="text-left text-lg font-semibold tracking-[-0.03em] text-neutral-950 md:text-right">{candidate.swimsuitTotal.toFixed(2)}</div>
+                          <div className="text-left text-sm font-semibold text-neutral-500 md:text-right">Evening Gown</div>
                         </div>
                       ))
                     : Array.from({ length: 15 }).map((_, index) => (
