@@ -18,28 +18,58 @@ const candidates = [
   { id: 15, city: "Tarlac", name: "Marian Arellano" }
 ];
 
+const TITLE_ORDER = [
+  "Miss Universe Philippines 2026",
+  "Miss Supranational Philippines 2026",
+  "Miss Cosmo Philippines 2026",
+  "Miss Charm Philippines 2026",
+  "Miss Eco International Philippines 2026",
+  "Miss Universe Philippines 1st Runner Up",
+  "Miss Universe Philippines 2nd Runner Up"
+];
+
 function clampScore(value) {
   if (value === "") return "";
-  const number = Number(value);
+  var number = Number(value);
   if (Number.isNaN(number)) return "";
   return Math.max(0, Math.min(100, number));
 }
 
-function hasScore(score = {}, key) {
+function hasScore(score, key) {
+  if (!score) return false;
   return score[key] !== "" && score[key] !== undefined;
 }
 
-function getScore(score = {}, key) {
-  return Number(score[key] || 0);
+function getScore(score, key) {
+  if (!score || score[key] === "" || score[key] === undefined) return 0;
+  return Number(score[key]);
+}
+
+function setScoreValue(current, candidateId, key, value) {
+  var next = Object.assign({}, current);
+  var currentCandidateScore = Object.assign({}, next[candidateId] || {});
+
+  if (key === "evening") {
+    currentCandidateScore.evening = value;
+  }
+
+  if (key === "qa") {
+    currentCandidateScore.qa = value;
+  }
+
+  next[candidateId] = currentCandidateScore;
+  return next;
 }
 
 function getInitials(name, city) {
-  const source = name === "Candidate" ? city : name;
+  var source = name === "Candidate" ? city : name;
   return source
     .split(/[\s,]+/)
     .filter(Boolean)
     .slice(0, 2)
-    .map((word) => word[0])
+    .map(function (word) {
+      return word.charAt(0);
+    })
     .join("")
     .toUpperCase();
 }
@@ -50,17 +80,22 @@ function displayName(candidate) {
 
 function runTests() {
   console.assert(candidates.length === 15, "Expected 15 official semifinalists.");
-  console.assert(titleOrder.length === 7, "Expected 7 titles.");
-  console.assert(officialTop15Cities.length === 15, "Expected 15 official semifinalists.");
+  console.assert(TITLE_ORDER.length === 7, "Expected 7 titles.");
   console.assert(clampScore(120) === 100, "Scores above 100 should clamp to 100.");
   console.assert(clampScore(-5) === 0, "Scores below 0 should clamp to 0.");
+  console.assert(clampScore(88) === 88, "Valid score should remain unchanged.");
   console.assert(getScore({ evening: 88 }, "evening") === 88, "Evening gown score should be read correctly.");
   console.assert(getScore({ qa: 95 }, "qa") === 95, "Q&A score should be read correctly.");
+  console.assert(hasScore({ evening: 0 }, "evening") === true, "Zero should count as a completed score.");
+  console.assert(setScoreValue({}, 1, "evening", 91)[1].evening === 91, "Score setter should store evening score.");
 }
 
 runTests();
 
-function CandidatePhoto({ candidate, className = "" }) {
+function CandidatePhoto(props) {
+  var candidate = props.candidate;
+  var className = props.className || "";
+
   return (
     <div className={`grid place-items-center bg-neutral-100 text-neutral-950 ${className}`}>
       <div className="grid h-14 w-14 place-items-center rounded-full border border-neutral-200 bg-white text-lg font-semibold shadow-sm">
@@ -70,11 +105,11 @@ function CandidatePhoto({ candidate, className = "" }) {
   );
 }
 
-function StatCard({ label, value }) {
+function StatCard(props) {
   return (
     <div className="rounded-[24px] border border-neutral-200/70 bg-white px-5 py-4 shadow-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-[-0.055em] text-neutral-950">{value}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{props.label}</p>
+      <p className="mt-2 text-3xl font-semibold tracking-[-0.055em] text-neutral-950">{props.value}</p>
     </div>
   );
 }
@@ -82,7 +117,6 @@ function StatCard({ label, value }) {
 export default function PageantScoringSystem() {
   const [query, setQuery] = useState("");
   const [scores, setScores] = useState({});
-  const [top15Submitted, setTop15Submitted] = useState(true);
   const [top7Submitted, setTop7Submitted] = useState(false);
   const [finalSubmitted, setFinalSubmitted] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -90,78 +124,90 @@ export default function PageantScoringSystem() {
     "Official Top 15 is listed alphabetically by province/city. Evening gown scoring is unlocked for all semifinalists."
   );
 
-  const top15 = top15Submitted
-    ? officialTop15Cities.map((city, index) => {
-        const candidate = candidates.find((item) => item.city === city);
-        return {
-          ...candidate,
-          score: scores[candidate.id] || {},
-          placement: index + 1,
-        };
-      })
-    : [];
+  const top15 = useMemo(function () {
+    return candidates.map(function (candidate, index) {
+      return Object.assign({}, candidate, {
+        score: scores[candidate.id] || {},
+        placement: index + 1
+      });
+    });
+  }, [scores]);
 
-  const top15Ids = useMemo(() => new Set(top15.map((candidate) => candidate.id)), [top15]);
+  const top15Ids = useMemo(function () {
+    return new Set(top15.map(function (candidate) {
+      return candidate.id;
+    }));
+  }, [top15]);
 
-  const eveningRanking = useMemo(() => {
+  const eveningRanking = useMemo(function () {
     return top15
-      .map((candidate) => {
-        const score = scores[candidate.id] || {};
-        return {
-          ...candidate,
-          score,
+      .map(function (candidate) {
+        var score = scores[candidate.id] || {};
+        return Object.assign({}, candidate, {
+          score: score,
           eveningTotal: getScore(score, "evening"),
-          eveningComplete: hasScore(score, "evening") ? 1 : 0,
-        };
+          eveningComplete: hasScore(score, "evening") ? 1 : 0
+        });
       })
-      .sort((a, b) => {
-        if (b.eveningTotal !== a.eveningTotal) return b.eveningTotal - a.eveningTotal;
+      .sort(function (a, b) {
         if (b.eveningComplete !== a.eveningComplete) return b.eveningComplete - a.eveningComplete;
+        if (b.eveningTotal !== a.eveningTotal) return b.eveningTotal - a.eveningTotal;
         return a.placement - b.placement;
       });
   }, [scores, top15]);
 
-  const top7 = top7Submitted
-    ? eveningRanking.slice(0, 7).map((candidate, index) => ({ ...candidate, placement: index + 1 }))
-    : [];
+  const top7 = useMemo(function () {
+    if (!top7Submitted) return [];
+    return eveningRanking.slice(0, 7).map(function (candidate, index) {
+      return Object.assign({}, candidate, { placement: index + 1 });
+    });
+  }, [top7Submitted, eveningRanking]);
 
-  const top7Ids = useMemo(() => new Set(top7.map((candidate) => candidate.id)), [top7]);
+  const top7Ids = useMemo(function () {
+    return new Set(top7.map(function (candidate) {
+      return candidate.id;
+    }));
+  }, [top7]);
 
-  const finalRanking = useMemo(() => {
+  const finalRanking = useMemo(function () {
     return top7
-      .map((candidate) => {
-        const score = scores[candidate.id] || {};
-        return {
-          ...candidate,
-          score,
+      .map(function (candidate) {
+        var score = scores[candidate.id] || {};
+        return Object.assign({}, candidate, {
+          score: score,
           finalTotal: getScore(score, "qa"),
-          qaComplete: hasScore(score, "qa") ? 1 : 0,
-        };
+          qaComplete: hasScore(score, "qa") ? 1 : 0
+        });
       })
-      .sort((a, b) => {
-        if (b.finalTotal !== a.finalTotal) return b.finalTotal - a.finalTotal;
+      .sort(function (a, b) {
         if (b.qaComplete !== a.qaComplete) return b.qaComplete - a.qaComplete;
+        if (b.finalTotal !== a.finalTotal) return b.finalTotal - a.finalTotal;
         if (b.eveningTotal !== a.eveningTotal) return b.eveningTotal - a.eveningTotal;
         return a.placement - b.placement;
       });
   }, [scores, top7]);
 
-  const titleholders = finalSubmitted
-    ? finalRanking.slice(0, 7).map((candidate, index) => ({
-        ...candidate,
-        title: titleOrder[index],
-        placement: index + 1,
-      }))
-    : [];
+  const titleholders = useMemo(function () {
+    if (!finalSubmitted) return [];
+    return finalRanking.slice(0, 7).map(function (candidate, index) {
+      return Object.assign({}, candidate, {
+        title: TITLE_ORDER[index],
+        placement: index + 1
+      });
+    });
+  }, [finalSubmitted, finalRanking]);
 
-  const filteredCandidates = candidates.filter((candidate) => {
-    const clean = query.trim().toLowerCase();
-    if (!clean) return true;
-    return candidate.name.toLowerCase().includes(clean) || candidate.city.toLowerCase().includes(clean);
-  });
+  const filteredCandidates = useMemo(function () {
+    var clean = query.trim().toLowerCase();
+    if (!clean) return candidates;
 
-  const updateScore = (candidateId, key, value) => {
-    const cleanValue = clampScore(value);
+    return candidates.filter(function (candidate) {
+      return candidate.name.toLowerCase().includes(clean) || candidate.city.toLowerCase().includes(clean);
+    });
+  }, [query]);
+
+  function updateScore(candidateId, key, value) {
+    var cleanValue = clampScore(value);
 
     if (key === "evening") {
       setTop7Submitted(false);
@@ -174,88 +220,79 @@ export default function PageantScoringSystem() {
       setVerificationMessage("Q&A scores were updated. Submit final scores again to reveal the titleholders.");
     }
 
-    setScores((current) => ({
-      ...current,
-      [candidateId]: {
-        ...(current[candidateId] || {}),
-        [key]: cleanValue,
-      },
-    }));
-  };
+    setScores(function (current) {
+      return setScoreValue(current, candidateId, key, cleanValue);
+    });
+  }
 
-  const clearScores = () => {
+  function clearScores() {
     setScores({});
-    setTop15Submitted(true);
     setTop7Submitted(false);
     setFinalSubmitted(false);
     setIsVerifying(false);
     setVerificationMessage("Official Top 15 is listed alphabetically by province/city. Evening gown scoring is unlocked for all semifinalists.");
-  };
+  }
 
-  const verifyWithDelay = (message, callback) => {
+  function verifyWithDelay(message, callback) {
     setIsVerifying(true);
     setVerificationMessage(message);
-    window.setTimeout(() => {
+    window.setTimeout(function () {
       setIsVerifying(false);
       callback();
-    }, 900);
-  };
+    }, 700);
+  }
 
-  const handleSubmitTop15 = () => {
-    verifyWithDelay("Loading the official Top 15 semifinalists...", () => {
-      setTop15Submitted(true);
-      setTop7Submitted(false);
-      setFinalSubmitted(false);
-      setVerificationMessage("Official Top 15 is listed alphabetically by province/city. Evening gown scoring is unlocked for all semifinalists.");
+  function handleSubmitTop7() {
+    var incomplete = top15.filter(function (candidate) {
+      return !hasScore(scores[candidate.id], "evening");
     });
-  };
-
-  const handleSubmitTop7 = () => {
-    if (!top15Submitted) {
-      setVerificationMessage("Reveal the official Top 15 first before scoring evening gown.");
-      return;
-    }
-
-    const incomplete = top15.filter((candidate) => !hasScore(scores[candidate.id], "evening"));
 
     if (incomplete.length > 0) {
       setVerificationMessage(
-        `Top 7 verification failed: ${incomplete.length} Top 15 candidate${incomplete.length === 1 ? "" : "s"} still need evening gown scores.`
+        "Top 7 verification failed: " + incomplete.length + " Top 15 candidate" + (incomplete.length === 1 ? "" : "s") + " still need evening gown scores."
       );
       return;
     }
 
-    verifyWithDelay("Verifying evening gown scores for the Top 15...", () => {
+    verifyWithDelay("Verifying evening gown scores for the Top 15...", function () {
       setTop7Submitted(true);
       setFinalSubmitted(false);
       setVerificationMessage("Top 7 revealed. Now score Q&A for the Top 7 only, then reveal the titleholders.");
     });
-  };
+  }
 
-  const handleSubmitFinal = () => {
+  function handleSubmitFinal() {
     if (!top7Submitted) {
       setVerificationMessage("Reveal the Top 7 first before scoring Q&A.");
       return;
     }
 
-    const incomplete = top7.filter((candidate) => !hasScore(scores[candidate.id], "qa"));
+    var incomplete = top7.filter(function (candidate) {
+      return !hasScore(scores[candidate.id], "qa");
+    });
 
     if (incomplete.length > 0) {
       setVerificationMessage(
-        `Final verification failed: ${incomplete.length} Top 7 candidate${incomplete.length === 1 ? "" : "s"} still need Q&A scores.`
+        "Final verification failed: " + incomplete.length + " Top 7 candidate" + (incomplete.length === 1 ? "" : "s") + " still need Q&A scores."
       );
       return;
     }
 
-    verifyWithDelay("Verifying Q&A scores for the Top 7...", () => {
+    verifyWithDelay("Verifying Q&A scores for the Top 7...", function () {
       setFinalSubmitted(true);
       setVerificationMessage("Final scores verified. Official titleholders are now revealed.");
     });
-  };
+  }
 
-  const eveningCompleted = top15.filter((candidate) => hasScore(scores[candidate.id], "evening")).length;
-  const qaCompleted = top7.filter((candidate) => hasScore(scores[candidate.id], "qa")).length;
-  const highestFinal = finalSubmitted ? titleholders[0]?.finalTotal?.toFixed(2) || "0.00" : "—";
+  const eveningCompleted = top15.filter(function (candidate) {
+    return hasScore(scores[candidate.id], "evening");
+  }).length;
+
+  const qaCompleted = top7.filter(function (candidate) {
+    return hasScore(scores[candidate.id], "qa");
+  }).length;
+
+  const highestFinal = finalSubmitted && titleholders[0] ? titleholders[0].finalTotal.toFixed(2) : "—";
 
   return (
     <div className="min-h-screen bg-[#f7f7f8] text-neutral-950 [font-family:-apple-system,BlinkMacSystemFont,'SF_Pro_Display','SF_Pro_Text','Helvetica_Neue',Arial,sans-serif]">
@@ -280,11 +317,11 @@ export default function PageantScoringSystem() {
             <a href="#results" className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950">Results</a>
             <a href="#scorecards" className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800">Scorecards</a>
             <button
-              onClick={!top15Submitted ? handleSubmitTop15 : !top7Submitted ? handleSubmitTop7 : handleSubmitFinal}
+              onClick={top7Submitted ? handleSubmitFinal : handleSubmitTop7}
               disabled={isVerifying}
               className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isVerifying ? "Verifying..." : !top15Submitted ? "Submit Official Top 15" : !top7Submitted ? "Submit Top 15 Gown" : "Submit Top 7 Q&A"}
+              {isVerifying ? "Verifying..." : top7Submitted ? "Submit Top 7 Q&A" : "Submit Top 15 Gown"}
             </button>
             <button onClick={clearScores} className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100">Clear</button>
           </div>
@@ -305,8 +342,8 @@ export default function PageantScoringSystem() {
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2">
             <StatCard label="Official Top 15" value="Revealed" />
-            <StatCard label="Gown Ready" value={top15Submitted ? `${eveningCompleted}/15` : "—"} />
-            <StatCard label="Q&A Ready" value={top7Submitted ? `${qaCompleted}/7` : "—"} />
+            <StatCard label="Gown Ready" value={eveningCompleted + "/15"} />
+            <StatCard label="Q&A Ready" value={top7Submitted ? qaCompleted + "/7" : "—"} />
             <StatCard label="Highest Final" value={highestFinal} />
           </div>
         </section>
@@ -334,10 +371,7 @@ export default function PageantScoringSystem() {
                   <p className="mt-1 text-sm font-semibold">{verificationMessage}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button onClick={handleSubmitTop15} disabled={isVerifying} className="rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:border-neutral-950 disabled:cursor-not-allowed disabled:opacity-60">
-                    Official Top 15 Revealed
-                  </button>
-                  <button onClick={handleSubmitTop7} disabled={isVerifying || !top15Submitted} className="rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:border-neutral-950 disabled:cursor-not-allowed disabled:opacity-40">
+                  <button onClick={handleSubmitTop7} disabled={isVerifying} className="rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:border-neutral-950 disabled:cursor-not-allowed disabled:opacity-60">
                     {top7Submitted ? "Top 7 Revealed" : "Submit Top 15 Gown"}
                   </button>
                   <button onClick={handleSubmitFinal} disabled={isVerifying || !top7Submitted} className="rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40">
@@ -365,26 +399,19 @@ export default function PageantScoringSystem() {
                 </div>
 
                 <div className="divide-y divide-neutral-100">
-                  {top15Submitted
-                    ? top15.map((candidate) => (
-                        <div key={candidate.id} className="grid gap-3 px-4 py-4 md:grid-cols-[88px_1.4fr_1fr_140px] md:items-center md:gap-0">
-                          <div className="text-sm font-semibold text-neutral-900">#{candidate.placement}</div>
-                          <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 overflow-hidden rounded-full bg-neutral-100"><CandidatePhoto candidate={candidate} className="h-full w-full" /></div>
-                            <div className="min-w-0"><p className="truncate text-sm font-semibold text-neutral-950">{displayName(candidate)}</p><p className="text-xs text-neutral-400 md:hidden">{candidate.city}</p></div>
-                          </div>
-                          <div className="hidden text-sm text-neutral-500 md:block">{candidate.city}</div>
-                          <div className="text-left text-sm font-semibold text-neutral-500 md:text-right">Scored</div>
+                  {top15.map(function (candidate) {
+                    return (
+                      <div key={candidate.id} className="grid gap-3 px-4 py-4 md:grid-cols-[88px_1.4fr_1fr_140px] md:items-center md:gap-0">
+                        <div className="text-sm font-semibold text-neutral-900">#{candidate.placement}</div>
+                        <div className="flex items-center gap-3">
+                          <div className="h-12 w-12 overflow-hidden rounded-full bg-neutral-100"><CandidatePhoto candidate={candidate} className="h-full w-full" /></div>
+                          <div className="min-w-0"><p className="truncate text-sm font-semibold text-neutral-950">{displayName(candidate)}</p><p className="text-xs text-neutral-400 md:hidden">{candidate.city}</p></div>
                         </div>
-                      ))
-                    : Array.from({ length: 15 }).map((_, index) => (
-                        <div key={index} className="grid gap-3 px-4 py-4 md:grid-cols-[88px_1.4fr_1fr_140px] md:items-center md:gap-0">
-                          <div className="text-sm font-semibold text-neutral-300">#{index + 1}</div>
-                          <div className="flex items-center gap-3"><div className="h-12 w-12 rounded-full bg-neutral-100" /><div className="h-4 w-40 rounded-full bg-neutral-100" /></div>
-                          <div className="hidden h-4 w-32 rounded-full bg-neutral-100 md:block" />
-                          <div className="h-4 w-16 rounded-full bg-neutral-100 md:ml-auto" />
-                        </div>
-                      ))}
+                        <div className="hidden text-sm text-neutral-500 md:block">{candidate.city}</div>
+                        <div className="text-left text-sm font-semibold text-neutral-500 md:text-right">Scored</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -403,22 +430,24 @@ export default function PageantScoringSystem() {
                   <div className="rounded-[30px] border border-dashed border-neutral-200 bg-neutral-50 p-8 text-center xl:col-span-4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">Awaiting Evening Gown</p>
                     <h4 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-neutral-950">Top 7 finalists are hidden</h4>
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-neutral-500">Reveal the official Top 15 first, then enter evening gown scores for the Top 15 to reveal the Top 7.</p>
+                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-neutral-500">Enter evening gown scores for the Top 15, then submit to reveal the Top 7.</p>
                   </div>
                 )}
-                {top7Submitted && top7.map((candidate) => (
-                  <div key={candidate.id} className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm">
-                    <div className="flex gap-4">
-                      <div className="h-24 w-20 shrink-0 overflow-hidden rounded-[20px] bg-neutral-100"><CandidatePhoto candidate={candidate} className="h-full w-full" /></div>
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-2 inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-semibold text-neutral-500">Rank #{candidate.placement}</div>
-                        <p className="truncate text-sm font-semibold text-neutral-950">{displayName(candidate)}</p>
-                        <p className="mt-1 truncate text-xs text-neutral-400">{candidate.city}</p>
-                        <p className="mt-3 text-lg font-semibold tracking-[-0.04em] text-neutral-950">{candidate.eveningTotal.toFixed(2)}</p>
+                {top7Submitted && top7.map(function (candidate) {
+                  return (
+                    <div key={candidate.id} className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm">
+                      <div className="flex gap-4">
+                        <div className="h-24 w-20 shrink-0 overflow-hidden rounded-[20px] bg-neutral-100"><CandidatePhoto candidate={candidate} className="h-full w-full" /></div>
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-2 inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-semibold text-neutral-500">Rank #{candidate.placement}</div>
+                          <p className="truncate text-sm font-semibold text-neutral-950">{displayName(candidate)}</p>
+                          <p className="mt-1 truncate text-xs text-neutral-400">{candidate.city}</p>
+                          <p className="mt-3 text-lg font-semibold tracking-[-0.04em] text-neutral-950">{candidate.eveningTotal.toFixed(2)}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -461,22 +490,24 @@ export default function PageantScoringSystem() {
                   </div>
                 )}
 
-                {finalSubmitted && titleholders.slice(1).map((candidate) => (
-                  <div key={candidate.id} className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm">
-                    <div className="flex gap-4">
-                      <div className="h-24 w-20 shrink-0 overflow-hidden rounded-[20px] bg-neutral-100"><CandidatePhoto candidate={candidate} className="h-full w-full" /></div>
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-2 inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-semibold text-neutral-500">Rank #{candidate.placement}</div>
-                        <h3 className="line-clamp-2 text-base font-semibold leading-5 tracking-[-0.025em] text-neutral-950">{candidate.title}</h3>
-                        <p className="mt-2 truncate text-sm font-medium text-neutral-700">{displayName(candidate)}</p>
-                        <div className="mt-3 flex items-center justify-between gap-3">
-                          <p className="truncate text-xs text-neutral-400">{candidate.city}</p>
-                          <p className="text-lg font-semibold tracking-[-0.04em] text-neutral-950">{candidate.finalTotal.toFixed(2)}</p>
+                {finalSubmitted && titleholders.slice(1).map(function (candidate) {
+                  return (
+                    <div key={candidate.id} className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm">
+                      <div className="flex gap-4">
+                        <div className="h-24 w-20 shrink-0 overflow-hidden rounded-[20px] bg-neutral-100"><CandidatePhoto candidate={candidate} className="h-full w-full" /></div>
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-2 inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-semibold text-neutral-500">Rank #{candidate.placement}</div>
+                          <h3 className="line-clamp-2 text-base font-semibold leading-5 tracking-[-0.025em] text-neutral-950">{candidate.title}</h3>
+                          <p className="mt-2 truncate text-sm font-medium text-neutral-700">{displayName(candidate)}</p>
+                          <div className="mt-3 flex items-center justify-between gap-3">
+                            <p className="truncate text-xs text-neutral-400">{candidate.city}</p>
+                            <p className="text-lg font-semibold tracking-[-0.04em] text-neutral-950">{candidate.finalTotal.toFixed(2)}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -486,7 +517,7 @@ export default function PageantScoringSystem() {
           <div className="rounded-[26px] border border-neutral-200/70 bg-white p-5 shadow-sm">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Top 15</p>
             <h3 className="mt-2 text-2xl font-semibold tracking-[-0.045em]">Official Semifinalists</h3>
-            <p className="mt-2 text-sm text-neutral-500">The official Top 15 is shown alphabetically. Evening gown scoring is already unlocked.</p>
+            <p className="mt-2 text-sm text-neutral-500">The official Top 15 is shown alphabetically by province/city. Evening gown scoring is already unlocked.</p>
           </div>
           <div className="rounded-[26px] border border-neutral-200/70 bg-white p-5 shadow-sm">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Top 7 Formula</p>
@@ -517,11 +548,15 @@ export default function PageantScoringSystem() {
           </div>
 
           <div className="grid gap-px bg-neutral-100 md:grid-cols-2 xl:grid-cols-3">
-            {filteredCandidates.map((candidate) => {
-              const score = scores[candidate.id] || {};
-              const isTop15 = top15Ids.has(candidate.id);
-              const isTop7 = top7Ids.has(candidate.id);
-              const currentTitle = finalSubmitted ? titleholders.find((item) => item.id === candidate.id)?.title : undefined;
+            {filteredCandidates.map(function (candidate) {
+              var score = scores[candidate.id] || {};
+              var isTop15 = top15Ids.has(candidate.id);
+              var isTop7 = top7Ids.has(candidate.id);
+              var currentTitle = finalSubmitted
+                ? titleholders.find(function (item) {
+                    return item.id === candidate.id;
+                  })
+                : null;
 
               return (
                 <article key={candidate.id} className="bg-white p-5">
@@ -544,19 +579,19 @@ export default function PageantScoringSystem() {
 
                         {isTop15 && <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs font-semibold leading-4 text-neutral-600">Official Top 15</div>}
                         {isTop7 && <div className="mt-2 rounded-2xl border border-neutral-200 bg-neutral-950 px-3 py-2 text-xs font-semibold leading-4 text-white">Top 7 Finalist</div>}
-                        {currentTitle && <div className="mt-2 rounded-2xl border border-neutral-200 bg-neutral-950 px-3 py-2 text-xs font-semibold leading-4 text-white">{currentTitle}</div>}
+                        {currentTitle && <div className="mt-2 rounded-2xl border border-neutral-200 bg-neutral-950 px-3 py-2 text-xs font-semibold leading-4 text-white">{currentTitle.title}</div>}
                       </div>
                     </div>
 
                     <div className="grid gap-3 border-t border-neutral-100 bg-neutral-50/70 p-4 sm:grid-cols-2">
                       <label className="block">
                         <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Evening Gown</span>
-                        <input type="number" min="0" max="100" value={score.evening ?? ""} onChange={(event) => updateScore(candidate.id, "evening", event.target.value)} placeholder={isTop15 ? "0" : "Locked"} disabled={!isTop15} className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-300" />
+                        <input type="number" min="0" max="100" value={score.evening || score.evening === 0 ? score.evening : ""} onChange={(event) => updateScore(candidate.id, "evening", event.target.value)} placeholder="0" className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950" />
                       </label>
 
                       <label className="block">
                         <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Q&A</span>
-                        <input type="number" min="0" max="100" value={score.qa ?? ""} onChange={(event) => updateScore(candidate.id, "qa", event.target.value)} placeholder={top7Submitted ? "0" : "Locked"} disabled={!top7Submitted || !isTop7} className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-300" />
+                        <input type="number" min="0" max="100" value={score.qa || score.qa === 0 ? score.qa : ""} onChange={(event) => updateScore(candidate.id, "qa", event.target.value)} placeholder={top7Submitted && isTop7 ? "0" : "Locked"} disabled={!top7Submitted || !isTop7} className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-300" />
                       </label>
                     </div>
                   </div>
