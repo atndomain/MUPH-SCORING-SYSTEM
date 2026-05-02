@@ -87,13 +87,16 @@ function getInitials(name, city) {
     .toUpperCase();
 }
 
+function displayName(candidate) {
+  return candidate.name === "Candidate" ? candidate.city : candidate.name;
+}
+
 function runTests() {
   console.assert(candidates.length === 30, "Expected 30 candidates.");
   console.assert(titleOrder.length === 7, "Expected 7 titles.");
   console.assert(officialTop15Cities.length === 15, "Expected 15 official semifinalists.");
   console.assert(clampScore(120) === 100, "Scores above 100 should clamp to 100.");
   console.assert(clampScore(-5) === 0, "Scores below 0 should clamp to 0.");
-  console.assert(getScore({ swimsuit: 91 }, "swimsuit") === 91, "Swimsuit score should be read correctly.");
   console.assert(getScore({ evening: 88 }, "evening") === 88, "Evening gown score should be read correctly.");
   console.assert(getScore({ qa: 95 }, "qa") === 95, "Q&A score should be read correctly.");
 }
@@ -119,48 +122,23 @@ function StatCard({ label, value }) {
   );
 }
 
-function displayName(candidate) {
-  return candidate.name === "Candidate" ? candidate.city : candidate.name;
-}
-
 export default function PageantScoringSystem() {
   const [query, setQuery] = useState("");
   const [scores, setScores] = useState({});
-  const [top15Submitted, setTop15Submitted] = useState(false);
+  const [top15Submitted, setTop15Submitted] = useState(true);
   const [top7Submitted, setTop7Submitted] = useState(false);
   const [finalSubmitted, setFinalSubmitted] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState(
-    "Score swimsuit for all Top 30 candidates first. Submit to reveal the Top 15."
+    "Official Top 15 is already revealed. Evening gown scoring is unlocked for the Top 15."
   );
-
-  const swimsuitRanking = useMemo(() => {
-    return candidates
-      .map((candidate) => {
-        const score = scores[candidate.id] || {};
-        return {
-          ...candidate,
-          score,
-          swimsuitTotal: getScore(score, "swimsuit"),
-          swimsuitComplete: hasScore(score, "swimsuit") ? 1 : 0,
-        };
-      })
-      .sort((a, b) => {
-        if (b.swimsuitTotal !== a.swimsuitTotal) return b.swimsuitTotal - a.swimsuitTotal;
-        if (b.swimsuitComplete !== a.swimsuitComplete) return b.swimsuitComplete - a.swimsuitComplete;
-        return a.id - b.id;
-      });
-  }, [scores]);
 
   const top15 = top15Submitted
     ? officialTop15Cities.map((city, index) => {
         const candidate = candidates.find((item) => item.city === city);
-        const rankedCandidate = swimsuitRanking.find((item) => item.city === city);
         return {
           ...candidate,
           score: scores[candidate.id] || {},
-          swimsuitTotal: rankedCandidate?.swimsuitTotal || 0,
-          swimsuitComplete: rankedCandidate?.swimsuitComplete || 0,
           placement: index + 1,
         };
       })
@@ -181,7 +159,7 @@ export default function PageantScoringSystem() {
       })
       .sort((a, b) => {
         if (b.eveningTotal !== a.eveningTotal) return b.eveningTotal - a.eveningTotal;
-        if (b.swimsuitTotal !== a.swimsuitTotal) return b.swimsuitTotal - a.swimsuitTotal;
+        if (b.eveningComplete !== a.eveningComplete) return b.eveningComplete - a.eveningComplete;
         return a.placement - b.placement;
       });
   }, [scores, top15]);
@@ -205,6 +183,7 @@ export default function PageantScoringSystem() {
       })
       .sort((a, b) => {
         if (b.finalTotal !== a.finalTotal) return b.finalTotal - a.finalTotal;
+        if (b.qaComplete !== a.qaComplete) return b.qaComplete - a.qaComplete;
         if (b.eveningTotal !== a.eveningTotal) return b.eveningTotal - a.eveningTotal;
         return a.placement - b.placement;
       });
@@ -226,13 +205,6 @@ export default function PageantScoringSystem() {
 
   const updateScore = (candidateId, key, value) => {
     const cleanValue = clampScore(value);
-
-    if (key === "swimsuit") {
-      setTop15Submitted(false);
-      setTop7Submitted(false);
-      setFinalSubmitted(false);
-      setVerificationMessage("Swimsuit scores were updated. Submit again to reveal the Top 15.");
-    }
 
     if (key === "evening") {
       setTop7Submitted(false);
@@ -256,11 +228,11 @@ export default function PageantScoringSystem() {
 
   const clearScores = () => {
     setScores({});
-    setTop15Submitted(false);
+    setTop15Submitted(true);
     setTop7Submitted(false);
     setFinalSubmitted(false);
     setIsVerifying(false);
-    setVerificationMessage("Score swimsuit for all Top 30 candidates first. Submit to reveal the Top 15.");
+    setVerificationMessage("Official Top 15 is already revealed. Evening gown scoring is unlocked for the Top 15.");
   };
 
   const verifyWithDelay = (message, callback) => {
@@ -273,16 +245,7 @@ export default function PageantScoringSystem() {
   };
 
   const handleSubmitTop15 = () => {
-    const incomplete = candidates.filter((candidate) => !hasScore(scores[candidate.id], "swimsuit"));
-
-    if (incomplete.length > 0) {
-      setVerificationMessage(
-        `Top 15 verification failed: ${incomplete.length} candidate${incomplete.length === 1 ? "" : "s"} still need swimsuit scores.`
-      );
-      return;
-    }
-
-    verifyWithDelay("Verifying swimsuit scores and loading the official Top 15...", () => {
+    verifyWithDelay("Loading the official Top 15 semifinalists...", () => {
       setTop15Submitted(true);
       setTop7Submitted(false);
       setFinalSubmitted(false);
@@ -292,7 +255,7 @@ export default function PageantScoringSystem() {
 
   const handleSubmitTop7 = () => {
     if (!top15Submitted) {
-      setVerificationMessage("Reveal the Top 15 first before scoring evening gown.");
+      setVerificationMessage("Reveal the official Top 15 first before scoring evening gown.");
       return;
     }
 
@@ -333,7 +296,6 @@ export default function PageantScoringSystem() {
     });
   };
 
-  const swimsuitCompleted = candidates.filter((candidate) => hasScore(scores[candidate.id], "swimsuit")).length;
   const eveningCompleted = top15.filter((candidate) => hasScore(scores[candidate.id], "evening")).length;
   const qaCompleted = top7.filter((candidate) => hasScore(scores[candidate.id], "qa")).length;
   const highestFinal = finalSubmitted ? titleholders[0]?.finalTotal?.toFixed(2) || "0.00" : "—";
@@ -365,7 +327,7 @@ export default function PageantScoringSystem() {
               disabled={isVerifying}
               className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isVerifying ? "Verifying..." : !top15Submitted ? "Submit Top 30 Swimsuit" : !top7Submitted ? "Submit Top 15 Gown" : "Submit Top 7 Q&A"}
+              {isVerifying ? "Verifying..." : !top15Submitted ? "Submit Official Top 15" : !top7Submitted ? "Submit Top 15 Gown" : "Submit Top 7 Q&A"}
             </button>
             <button onClick={clearScores} className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100">Clear</button>
           </div>
@@ -374,18 +336,18 @@ export default function PageantScoringSystem() {
         <section className="grid gap-8 py-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:py-16">
           <div>
             <div className="mb-5 inline-flex rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-500 shadow-sm">
-              Top 30: Swimsuit → Top 15: Evening Gown → Top 7: Q&A
+              Official Top 15 → Evening Gown → Top 7 → Q&A
             </div>
             <h2 className="max-w-5xl text-5xl font-semibold leading-[0.94] tracking-[-0.075em] md:text-7xl lg:text-8xl">
               Miss Universe Philippines 2026 Scoring System
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-500">
-              Score swimsuit for all Top 30 candidates to reveal the Top 15. Then score evening gown for the Top 15 to reveal the Top 7. Finally, score Q&A for the Top 7 to reveal the titleholders.
+              Click submit to reveal the official Top 15. Then score evening gown for the Top 15 to reveal the Top 7. Finally, score Q&A for the Top 7 to reveal the titleholders.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2">
-            <StatCard label="Swimsuit Ready" value={`${swimsuitCompleted}/30`} />
+            <StatCard label="Official Top 15" value="Revealed" />
             <StatCard label="Gown Ready" value={top15Submitted ? `${eveningCompleted}/15` : "—"} />
             <StatCard label="Q&A Ready" value={top7Submitted ? `${qaCompleted}/7` : "—"} />
             <StatCard label="Highest Final" value={highestFinal} />
@@ -402,7 +364,7 @@ export default function PageantScoringSystem() {
                 <h2 className="mt-2 text-4xl font-semibold tracking-[-0.06em] md:text-6xl">Automatic Results</h2>
               </div>
               <p className="max-w-md text-sm leading-6 text-neutral-500">
-                Results stay hidden until each stage is verified: Top 30 Swimsuit, Top 15 Evening Gown, then Top 7 Q&A.
+                No swimsuit score is needed. The official Top 15 is revealed first, then evening gown determines Top 7, and Q&A determines the final titles.
               </p>
             </div>
           </div>
@@ -416,7 +378,7 @@ export default function PageantScoringSystem() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button onClick={handleSubmitTop15} disabled={isVerifying} className="rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:border-neutral-950 disabled:cursor-not-allowed disabled:opacity-60">
-                    {top15Submitted ? "Top 15 Revealed" : "Submit Top 30 Swimsuit"}
+                    {top15Submitted ? "Official Top 15 Revealed" : "Submit Official Top 15"}
                   </button>
                   <button onClick={handleSubmitTop7} disabled={isVerifying || !top15Submitted} className="rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:border-neutral-950 disabled:cursor-not-allowed disabled:opacity-40">
                     {top7Submitted ? "Top 7 Revealed" : "Submit Top 15 Gown"}
@@ -432,9 +394,9 @@ export default function PageantScoringSystem() {
               <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">Stage 1</p>
-                  <h3 className="mt-1 text-3xl font-semibold tracking-[-0.05em] md:text-4xl">Top 15 Semifinalists</h3>
+                  <h3 className="mt-1 text-3xl font-semibold tracking-[-0.05em] md:text-4xl">Official Top 15 Semifinalists</h3>
                 </div>
-                <p className="text-sm text-neutral-500">Official Top 15 list for evening gown scoring</p>
+                <p className="text-sm text-neutral-500">Official list for evening gown scoring</p>
               </div>
 
               <div className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white">
@@ -455,7 +417,7 @@ export default function PageantScoringSystem() {
                             <div className="min-w-0"><p className="truncate text-sm font-semibold text-neutral-950">{displayName(candidate)}</p><p className="text-xs text-neutral-400 md:hidden">{candidate.city}</p></div>
                           </div>
                           <div className="hidden text-sm text-neutral-500 md:block">{candidate.city}</div>
-                          <div className="text-left text-sm font-semibold text-neutral-500 md:text-right">Evening Gown</div>
+                          <div className="text-left text-sm font-semibold text-neutral-500 md:text-right">Scored</div>
                         </div>
                       ))
                     : Array.from({ length: 15 }).map((_, index) => (
@@ -484,7 +446,7 @@ export default function PageantScoringSystem() {
                   <div className="rounded-[30px] border border-dashed border-neutral-200 bg-neutral-50 p-8 text-center xl:col-span-4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">Awaiting Evening Gown</p>
                     <h4 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-neutral-950">Top 7 finalists are hidden</h4>
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-neutral-500">Reveal the Top 15 first, then enter evening gown scores for the Top 15 to reveal the Top 7.</p>
+                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-neutral-500">Reveal the official Top 15 first, then enter evening gown scores for the Top 15 to reveal the Top 7.</p>
                   </div>
                 )}
                 {top7Submitted && top7.map((candidate) => (
@@ -565,9 +527,9 @@ export default function PageantScoringSystem() {
 
         <section className="mb-8 grid gap-3 md:grid-cols-3">
           <div className="rounded-[26px] border border-neutral-200/70 bg-white p-5 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Top 15 Formula</p>
-            <h3 className="mt-2 text-2xl font-semibold tracking-[-0.045em]">Top 30 Swimsuit</h3>
-            <p className="mt-2 text-sm text-neutral-500">Swimsuit score determines the Top 15.</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Top 15</p>
+            <h3 className="mt-2 text-2xl font-semibold tracking-[-0.045em]">Official Semifinalists</h3>
+            <p className="mt-2 text-sm text-neutral-500">No swimsuit score entry is needed. Click submit to reveal the official Top 15.</p>
           </div>
           <div className="rounded-[26px] border border-neutral-200/70 bg-white p-5 shadow-sm">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Top 7 Formula</p>
@@ -600,7 +562,6 @@ export default function PageantScoringSystem() {
           <div className="grid gap-px bg-neutral-100 md:grid-cols-2 xl:grid-cols-3">
             {filteredCandidates.map((candidate) => {
               const score = scores[candidate.id] || {};
-              const swimsuitRank = swimsuitRanking.findIndex((item) => item.id === candidate.id) + 1;
               const isTop15 = top15Ids.has(candidate.id);
               const isTop7 = top7Ids.has(candidate.id);
               const currentTitle = finalSubmitted ? titleholders.find((item) => item.id === candidate.id)?.title : undefined;
@@ -614,31 +575,26 @@ export default function PageantScoringSystem() {
                       <div className="flex flex-col justify-between p-4">
                         <div>
                           <div className="flex items-start justify-between gap-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">#{candidate.id} · Swimsuit Rank {swimsuitRank}</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">#{candidate.id}</p>
                             <div className="rounded-2xl bg-neutral-950 px-3 py-2 text-right text-white">
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45">Swimsuit</p>
-                              <p className="text-xl font-semibold tracking-[-0.05em]">{getScore(score, "swimsuit").toFixed(2)}</p>
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45">Status</p>
+                              <p className="text-sm font-semibold">{isTop15 ? "Top 15" : "Top 30"}</p>
                             </div>
                           </div>
                           <h3 className="mt-3 text-xl font-semibold leading-6 tracking-[-0.04em]">{displayName(candidate)}</h3>
                           <p className="mt-1 text-sm font-medium text-neutral-500">{candidate.city}</p>
                         </div>
 
-                        {isTop15 && <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs font-semibold leading-4 text-neutral-600">Top 15 Semifinalist</div>}
+                        {isTop15 && <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs font-semibold leading-4 text-neutral-600">Official Top 15</div>}
                         {isTop7 && <div className="mt-2 rounded-2xl border border-neutral-200 bg-neutral-950 px-3 py-2 text-xs font-semibold leading-4 text-white">Top 7 Finalist</div>}
                         {currentTitle && <div className="mt-2 rounded-2xl border border-neutral-200 bg-neutral-950 px-3 py-2 text-xs font-semibold leading-4 text-white">{currentTitle}</div>}
                       </div>
                     </div>
 
-                    <div className="grid gap-3 border-t border-neutral-100 bg-neutral-50/70 p-4 sm:grid-cols-3">
-                      <label className="block">
-                        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Swimsuit</span>
-                        <input type="number" min="0" max="100" value={score.swimsuit ?? ""} onChange={(event) => updateScore(candidate.id, "swimsuit", event.target.value)} placeholder="0" className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950" />
-                      </label>
-
+                    <div className="grid gap-3 border-t border-neutral-100 bg-neutral-50/70 p-4 sm:grid-cols-2">
                       <label className="block">
                         <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Evening Gown</span>
-                        <input type="number" min="0" max="100" value={score.evening ?? ""} onChange={(event) => updateScore(candidate.id, "evening", event.target.value)} placeholder={top15Submitted ? "0" : "Locked"} disabled={!top15Submitted || !isTop15} className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-300" />
+                        <input type="number" min="0" max="100" value={score.evening ?? ""} onChange={(event) => updateScore(candidate.id, "evening", event.target.value)} placeholder={isTop15 ? "0" : "Locked"} disabled={!isTop15} className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-3 text-center text-lg font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-300 focus:border-neutral-950 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-300" />
                       </label>
 
                       <label className="block">
