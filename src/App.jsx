@@ -1,64 +1,21 @@
 import React, { useMemo, useState } from "react";
 
 const candidates = [
-  { city: "Muntinlupa", name: "Adela-Mae Marshall" },
-  { city: "Rizal", name: "Alicia Buendia" },
-  { city: "Pampanga", name: "Allyson Hetland" },
-  { city: "Negros Occidental", name: "Alexandra Colmenares" },
-  { city: "Albay", name: "Alexandra Krishna Oriño" },
-  { city: "Cebu City", name: "Apriel Smith" },
-  { city: "Luisiana, Laguna", name: "Ashley Subijano Montenegro" },
-  { city: "La Union", name: "Bea Millan-Windorski" },
-  { city: "Samar Island", name: "Catherine Wardle" },
-  { city: "Ilocos Norte", name: "Cherieze Cacayorin" },
-  { city: "Tandag City", name: "Chrystel Mae Correos" },
-  { city: "Cotabato Province", name: "Clarissa Westram" },
-  { city: "Pangasinan", name: "Donna Rein Nuguid" },
-  { city: "Camiguin", name: "Erica Cadayday" },
-  { city: "Tacloban City", name: "Jacqueline Gulrajani" },
-  { city: "San Jose, Negros Oriental", name: "Jayka Munsayac" },
-  { city: "Cavite", name: "Jencel Caña" },
-  { city: "Sultan Kudarat", name: "Jenrose Javier" },
-  { city: "Manila", name: "Justine Felizarta" },
-  { city: "Mountain Province", name: "Lyneree Montero-Yodong" },
-  { city: "Tarlac", name: "Marian Arellano" },
-  { city: "Sarangani", name: "Nicole Cruz" },
-  { city: "Cebu Province", name: "Nicole Borromeo" },
-  { city: "Quezon Province", name: "Patricia Ella Evangelista" },
-  { city: "Sto. Tomas, La Union", name: "Rachel-Hanna Gozum" },
-  { city: "Baguio City", name: "Roxie Baeyens" },
-  { city: "Iligan City", name: "Trexy Paris Roxas" },
-  { city: "Taguig City", name: "Ysabella Ysmael" },
-  { city: "Laguna", name: "Ysabel Prats" },
-  { city: "Iloilo City", name: "Zestah Espinosa" },
-].map((candidate, index) => ({ ...candidate, id: index + 1 }));
-
-const officialTop15Cities = [
-  "Muntinlupa",
-  "Sultan Kudarat",
-  "Baguio City",
-  "Tacloban City",
-  "La Union",
-  "Quezon Province",
-  "Taguig City",
-  "Camiguin",
-  "Tarlac",
-  "Manila",
-  "Iloilo City",
-  "Cebu Province",
-  "Cebu City",
-  "Pampanga",
-  "Negros Occidental",
-];
-
-const titleOrder = [
-  "Miss Universe Philippines 2026",
-  "Miss Supranational Philippines 2026",
-  "Miss Cosmo Philippines 2026",
-  "Miss Charm Philippines 2026",
-  "Miss Eco International Philippines 2026",
-  "Miss Universe Philippines 1st Runner Up",
-  "Miss Universe Philippines 2nd Runner Up",
+  { id: 1, city: "Baguio City", name: "Roxie Baeyens" },
+  { id: 2, city: "Camiguin", name: "Erica Cadayday" },
+  { id: 3, city: "Cebu City", name: "Apriel Smith" },
+  { id: 4, city: "Cebu Province", name: "Nicole Borromeo" },
+  { id: 5, city: "Iloilo City", name: "Zestah Espinosa" },
+  { id: 6, city: "La Union", name: "Bea Millan-Windorski" },
+  { id: 7, city: "Manila", name: "Justine Felizarta" },
+  { id: 8, city: "Muntinlupa", name: "Adela-Mae Marshall" },
+  { id: 9, city: "Negros Occidental", name: "Alexandra Colmenares" },
+  { id: 10, city: "Pampanga", name: "Allyson Hetland" },
+  { id: 11, city: "Quezon Province", name: "Patricia Ella Evangelista" },
+  { id: 12, city: "Sultan Kudarat", name: "Jenrose Javier" },
+  { id: 13, city: "Tacloban City", name: "Jacqueline Gulrajani" },
+  { id: 14, city: "Taguig City", name: "Ysabella Ysmael" },
+  { id: 15, city: "Tarlac", name: "Marian Arellano" }
 ];
 
 function clampScore(value) {
@@ -92,7 +49,7 @@ function displayName(candidate) {
 }
 
 function runTests() {
-  console.assert(candidates.length === 30, "Expected 30 candidates.");
+  console.assert(candidates.length === 15, "Expected 15 official semifinalists.");
   console.assert(titleOrder.length === 7, "Expected 7 titles.");
   console.assert(officialTop15Cities.length === 15, "Expected 15 official semifinalists.");
   console.assert(clampScore(120) === 100, "Scores above 100 should clamp to 100.");
@@ -130,7 +87,7 @@ export default function PageantScoringSystem() {
   const [finalSubmitted, setFinalSubmitted] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState(
-    "Official Top 15 is already revealed. Evening gown scoring is unlocked for the Top 15."
+    "Official Top 15 is listed alphabetically by province/city. Evening gown scoring is unlocked for all semifinalists."
   );
 
   const top15 = top15Submitted
@@ -232,7 +189,7 @@ export default function PageantScoringSystem() {
     setTop7Submitted(false);
     setFinalSubmitted(false);
     setIsVerifying(false);
-    setVerificationMessage("Official Top 15 is already revealed. Evening gown scoring is unlocked for the Top 15.");
+    setVerificationMessage("Official Top 15 is listed alphabetically by province/city. Evening gown scoring is unlocked for all semifinalists.");
   };
 
   const verifyWithDelay = (message, callback) => {
@@ -249,7 +206,7 @@ export default function PageantScoringSystem() {
       setTop15Submitted(true);
       setTop7Submitted(false);
       setFinalSubmitted(false);
-      setVerificationMessage("Official Top 15 revealed. Now score evening gown for the Top 15 only.");
+      setVerificationMessage("Official Top 15 is listed alphabetically by province/city. Evening gown scoring is unlocked for all semifinalists.");
     });
   };
 
@@ -342,7 +299,7 @@ export default function PageantScoringSystem() {
               Miss Universe Philippines 2026 Scoring System
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-500">
-              Click submit to reveal the official Top 15. Then score evening gown for the Top 15 to reveal the Top 7. Finally, score Q&A for the Top 7 to reveal the titleholders.
+              The official Top 15 is listed alphabetically by province/city. Score evening gown for the Top 15 to reveal the Top 7. Finally, score Q&A for the Top 7 to reveal the titleholders.
             </p>
           </div>
 
@@ -364,7 +321,7 @@ export default function PageantScoringSystem() {
                 <h2 className="mt-2 text-4xl font-semibold tracking-[-0.06em] md:text-6xl">Automatic Results</h2>
               </div>
               <p className="max-w-md text-sm leading-6 text-neutral-500">
-                No swimsuit score is needed. The official Top 15 is revealed first, then evening gown determines Top 7, and Q&A determines the final titles.
+                Only the official Top 15 is shown. Evening gown determines the Top 7, and Q&A determines the final titles.
               </p>
             </div>
           </div>
@@ -378,7 +335,7 @@ export default function PageantScoringSystem() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button onClick={handleSubmitTop15} disabled={isVerifying} className="rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:border-neutral-950 disabled:cursor-not-allowed disabled:opacity-60">
-                    {top15Submitted ? "Official Top 15 Revealed" : "Submit Official Top 15"}
+                    Official Top 15 Revealed
                   </button>
                   <button onClick={handleSubmitTop7} disabled={isVerifying || !top15Submitted} className="rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:border-neutral-950 disabled:cursor-not-allowed disabled:opacity-40">
                     {top7Submitted ? "Top 7 Revealed" : "Submit Top 15 Gown"}
@@ -529,7 +486,7 @@ export default function PageantScoringSystem() {
           <div className="rounded-[26px] border border-neutral-200/70 bg-white p-5 shadow-sm">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Top 15</p>
             <h3 className="mt-2 text-2xl font-semibold tracking-[-0.045em]">Official Semifinalists</h3>
-            <p className="mt-2 text-sm text-neutral-500">No swimsuit score entry is needed. Click submit to reveal the official Top 15.</p>
+            <p className="mt-2 text-sm text-neutral-500">The official Top 15 is shown alphabetically. Evening gown scoring is already unlocked.</p>
           </div>
           <div className="rounded-[26px] border border-neutral-200/70 bg-white p-5 shadow-sm">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Top 7 Formula</p>
@@ -578,7 +535,7 @@ export default function PageantScoringSystem() {
                             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">#{candidate.id}</p>
                             <div className="rounded-2xl bg-neutral-950 px-3 py-2 text-right text-white">
                               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45">Status</p>
-                              <p className="text-sm font-semibold">{isTop15 ? "Top 15" : "Top 30"}</p>
+                              <p className="text-sm font-semibold">Top 15</p>
                             </div>
                           </div>
                           <h3 className="mt-3 text-xl font-semibold leading-6 tracking-[-0.04em]">{displayName(candidate)}</h3>
