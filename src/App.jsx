@@ -32,7 +32,6 @@ const candidates = [
   { city: "Samar Island", name: "Catherine Wardle" },
   { city: "Sto. Tomas, La Union", name: "Rachel-Hanna Gozum" },
 ].map((candidate, index) => ({ ...candidate, id: index + 1 }));
-].map((candidate, index) => ({ ...candidate, id: index + 1 }));
 
 const preliminaryCriteria = [
   { key: "swimsuit", label: "Swimsuit", weight: 50 },
